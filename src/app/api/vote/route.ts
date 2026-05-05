@@ -1,0 +1,53 @@
+import { NextResponse } from "next/server";
+import { createServerClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@supabase/supabase-js";
+import { cookies } from "next/headers";
+import type { Database } from "@/types";
+
+const adminSupabase = createClient<Database>(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+  process.env.SUPABASE_SERVICE_ROLE_KEY || "",
+  {
+    auth: { persistSession: false },
+  }
+);
+
+export async function POST(request: Request) {
+  const body = await request.json();
+  const { questionId, vote, questionText } = body;
+
+  if (!questionId || typeof vote !== "boolean") {
+    return NextResponse.json({ error: "Missing vote payload." }, { status: 400 });
+  }
+
+  const authSupabase = createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
+    { cookies: cookies() }
+  );
+  const {
+    data: { session },
+  } = await authSupabase.auth.getSession();
+
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
+  const questionExists = await authSupabase.from("questions").select("id").eq("id", questionId).single();
+
+  if (!questionExists.data && questionText) {
+    await adminSupabase.from("questions").upsert({ id: questionId, text: questionText, is_active: true });
+  }
+
+  const { error } = await authSupabase.from("votes").insert({
+    user_id: session.user.id,
+    question_id: questionId,
+    vote,
+  });
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 400 });
+  }
+
+  return NextResponse.json({ success: true });
+}
