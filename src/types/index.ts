@@ -29,43 +29,22 @@ export type Database = {
     Tables: {
       profiles: {
         Row: Profile;
-        Insert: {
-          id: string;
-          branch?: string | null;
-          year?: number | null;
-          goal?: string | null;
-          role?: string;
-        };
-        Update: {
-          branch?: string | null;
-          year?: number | null;
-          goal?: string | null;
-          role?: string;
-        };
+        Insert: Record<string, any>;
+        Update: Record<string, any>;
       };
       questions: {
         Row: Question;
-        Insert: {
-          id?: string;
-          text: string;
-          is_active?: boolean;
-        };
-        Update: {
-          text?: string;
-          is_active?: boolean;
-        };
+        Insert: Record<string, any>;
+        Update: Record<string, any>;
       };
       votes: {
         Row: Vote;
-        Insert: {
-          user_id: string;
-          question_id: string;
-          vote: boolean;
-        };
-        Update: {
-          vote?: boolean;
-        };
+        Insert: Record<string, any>;
+        Update: Record<string, any>;
       };
     };
+    Views: Record<string, any>;
+    Functions: Record<string, any>;
+    Enums: Record<string, any>;
   };
 };

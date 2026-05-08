@@ -39,9 +39,6 @@ export function Navbar() {
     router.refresh();
   };
 
-  const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL?.toLowerCase();
-  const isAdmin = Boolean(user?.email && adminEmail && user.email.toLowerCase() === adminEmail);
-
   return (
     <nav className="border-b border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
@@ -51,14 +48,6 @@ export function Navbar() {
 
         <div className="flex items-center gap-4">
           <ThemeToggle />
-          {!loading && isAdmin && (
-            <Link
-              href="/admin"
-              className="rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-            >
-              Admin
-            </Link>
-          )}
           {!loading && user && (
             <button
               onClick={handleLogout}

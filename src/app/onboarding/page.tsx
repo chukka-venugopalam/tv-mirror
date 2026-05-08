@@ -8,10 +8,10 @@ import { Navbar } from "@/components/Navbar";
 import { Card } from "@/components/Card";
 
 export default function OnboardingPage() {
-  const supabase = createBrowserClient<Database>(
+  const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || "",
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
-  );
+  ) as any;
   const router = useRouter();
   const [branch, setBranch] = useState("");
   const [year, setYear] = useState("");

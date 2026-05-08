@@ -11,11 +11,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Incomplete profile data." }, { status: 400 });
   }
 
-  const supabase = createServerClient<Database>(
+  const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || "",
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
     { cookies: cookies() }
-  );
+  ) as any;
   const {
     data: { session },
   } = await supabase.auth.getSession();

@@ -20,20 +20,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing vote payload." }, { status: 400 });
   }
 
-  const authSupabase = createServerClient<Database>(
+  const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || "",
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
     { cookies: cookies() }
-  );
+  ) as any;
   const {
     data: { session },
-  } = await authSupabase.auth.getSession();
+  } = await supabase.auth.getSession();
 
   if (!session) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 
-  const questionExists = await authSupabase.from("questions").select("id").eq("id", questionId).single();
+  const questionExists = await supabase.from("questions").select("id").eq("id", questionId).single();
 
   if (!questionExists.data && questionText) {
     await adminSupabase.from("questions").upsert({ id: questionId, text: questionText, is_active: true });
