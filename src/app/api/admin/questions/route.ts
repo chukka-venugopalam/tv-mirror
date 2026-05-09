@@ -5,13 +5,15 @@ import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import type { Database } from "@/types";
 
-const adminSupabase = createClient<Database>(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-  process.env.SUPABASE_SERVICE_ROLE_KEY || "",
-  {
-    auth: { persistSession: false },
-  }
-);
+async function getAdminSupabase() {
+  return createClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+    process.env.SUPABASE_SERVICE_ROLE_KEY || "",
+    {
+      auth: { persistSession: false },
+    }
+  );
+}
 
 async function requireAdmin() {
   const supabase = createServerClient<Database>(
@@ -34,13 +36,13 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 
-  const questionsResult = await adminSupabase.from("questions").select("id, text, is_active, created_at, votes(id)");
+  const questionsResult = await (await getAdminSupabase()).from("questions").select("id, text, is_active, created_at, votes(id)");
   if (questionsResult.error) {
     return NextResponse.json({ error: questionsResult.error.message }, { status: 500 });
   }
 
-  const usersCountResult = await adminSupabase.from("profiles").select("id", { count: "exact", head: true });
-  const votesCountResult = await adminSupabase.from("votes").select("id", { count: "exact", head: true });
+  const usersCountResult = await (await getAdminSupabase()).from("profiles").select("id", { count: "exact", head: true });
+  const votesCountResult = await (await getAdminSupabase()).from("votes").select("id", { count: "exact", head: true });
 
   if (usersCountResult.error || votesCountResult.error) {
     return NextResponse.json({ error: "Unable to load stats." }, { status: 500 });
@@ -84,11 +86,11 @@ export async function POST(request: Request) {
 
   if (isActive) {
     const updateData: Record<string, unknown> = { is_active: false };
-    await adminSupabase.from("questions").update(updateData).neq("is_active", false);
+    await (await getAdminSupabase()).from("questions").update(updateData).neq("is_active", false);
   }
 
   const insertData: Record<string, unknown> = { text, is_active: Boolean(isActive) };
-  const result = await adminSupabase.from("questions").insert(insertData).select().single();
+  const result = await (await getAdminSupabase()).from("questions").insert(insertData).select().single();
   if (result.error) {
     return NextResponse.json({ error: result.error.message }, { status: 500 });
   }
@@ -111,9 +113,9 @@ export async function PATCH(request: Request) {
 
   if (action === "toggle") {
     const updateData: Record<string, unknown> = { is_active: false };
-    await adminSupabase.from("questions").update(updateData).neq("is_active", false);
+    await (await getAdminSupabase()).from("questions").update(updateData).neq("is_active", false);
     const toggleData: Record<string, unknown> = { is_active: true };
-    const result = await adminSupabase.from("questions").update(toggleData).eq("id", id);
+    const result = await (await getAdminSupabase()).from("questions").update(toggleData).eq("id", id);
     if (result.error) {
       return NextResponse.json({ error: result.error.message }, { status: 500 });
     }
@@ -125,7 +127,7 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: "Question text is required." }, { status: 400 });
     }
     const updateData: Record<string, unknown> = { text };
-    const result = await adminSupabase.from("questions").update(updateData).eq("id", id);
+    const result = await (await getAdminSupabase()).from("questions").update(updateData).eq("id", id);
     if (result.error) {
       return NextResponse.json({ error: result.error.message }, { status: 500 });
     }

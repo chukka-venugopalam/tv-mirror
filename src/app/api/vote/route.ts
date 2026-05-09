@@ -4,13 +4,15 @@ import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import type { Database } from "@/types";
 
-const adminSupabase = createClient<Database>(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-  process.env.SUPABASE_SERVICE_ROLE_KEY || "",
-  {
-    auth: { persistSession: false },
-  }
-);
+function getAdminSupabase() {
+  return createClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+    process.env.SUPABASE_SERVICE_ROLE_KEY || "",
+    {
+      auth: { persistSession: false },
+    }
+  );
+}
 
 export async function POST(request: Request) {
   const body = await request.json();
@@ -36,10 +38,10 @@ export async function POST(request: Request) {
   const questionExists = await supabase.from("questions").select("id").eq("id", questionId).single();
 
   if (!questionExists.data && questionText) {
-    await adminSupabase.from("questions").upsert({ id: questionId, text: questionText, is_active: true });
+    await getAdminSupabase().from("questions").upsert({ id: questionId, text: questionText, is_active: true } as any);
   }
 
-  const { error } = await authSupabase.from("votes").insert({
+  const { error } = await supabase.from("votes").insert({
     user_id: session.user.id,
     question_id: questionId,
     vote,

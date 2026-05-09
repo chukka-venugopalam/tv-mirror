@@ -1,14 +1,16 @@
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { createServerClient } from "@supabase/auth-helpers-nextjs";
-import { getActiveQuestion, getProfile, getUserVote } from "@/lib/queries";
+import { getActiveQuestions, getProfile, getUserVote } from "@/lib/queries";
 import VoteButtons from "@/components/VoteButtons";
 import ResultsBar from "@/components/ResultsBar";
 import { Navbar } from "@/components/Navbar";
 import { Card } from "@/components/Card";
 import { ScrollAnimations } from "@/components/ScrollAnimations";
+import type { Database } from "@/types";
 
 export default async function HomePage() {
-  const supabase = createServerClient(
+  const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL || "",
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
     { cookies: cookies() }
@@ -26,12 +28,24 @@ export default async function HomePage() {
   const profile = await getProfile(supabase, userId);
 
   if (!profile || !profile.branch || !profile.year || !profile.goal) {
-    return <OnboardingRedirect />;
+    redirect("/onboarding");
   }
 
-  const activeQuestion = await getActiveQuestion(supabase);
-  const vote = activeQuestion ? await getUserVote(supabase, activeQuestion.id, userId) : null;
-  const hasVoted = Boolean(vote?.vote || vote?.vote === false);
+  const activeQuestions = await getActiveQuestions(supabase);
+  const votes = await Promise.all(
+    activeQuestions.map(async (question: any) => ({
+      question,
+      vote: await getUserVote(supabase, question.id, userId),
+    }))
+  );
+  const hasVotedMap = votes.reduce((acc, { question, vote }) => {
+    acc[question.id] = Boolean(vote?.vote || vote?.vote === false);
+    return acc;
+  }, {} as Record<string, boolean>);
+  const voteMap = votes.reduce((acc, { question, vote }) => {
+    acc[question.id] = vote;
+    return acc;
+  }, {} as Record<string, any>);
 
   return (
     <>
@@ -43,47 +57,55 @@ export default async function HomePage() {
               PulseVote
             </p>
             <h1 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">
-              Today's opinion check
+              Today's opinion checks
             </h1>
             <p className="mt-2 text-lg text-slate-600 dark:text-slate-300">
               {profile.branch} · Year {profile.year}
             </p>
           </div>
 
-          {activeQuestion ? (
-            <Card className="p-8">
-              <div className="space-y-8">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-cyan-400">
-                    Today's Question
-                  </p>
-                  <p className="mt-4 text-3xl font-bold leading-tight">
-                    {activeQuestion.text}
-                  </p>
-                </div>
+          {activeQuestions.length > 0 ? (
+            <div className="space-y-8">
+              {activeQuestions.map((question: any) => {
+                const hasVoted = hasVotedMap[question.id];
+                const vote = voteMap[question.id];
+                return (
+                  <Card key={question.id} className="p-8">
+                    <div className="space-y-8">
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-cyan-400">
+                          Question
+                        </p>
+                        <p className="mt-4 text-3xl font-bold leading-tight">
+                          {question.text}
+                        </p>
+                      </div>
 
-                <div className="space-y-6">
-                  {!hasVoted ? (
-                    <VoteButtons questionId={activeQuestion.id} questionText={activeQuestion.text} />
-                  ) : (
-                    <div className="rounded-lg bg-indigo-50 p-6 dark:bg-slate-700">
-                      <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-cyan-400">
-                        Your Vote
-                      </p>
-                      <p className="mt-3 text-2xl font-bold text-slate-900 dark:text-slate-50">
-                        {vote?.vote ? "✓ Agree" : "✗ Disagree"}
-                      </p>
+                      <div className="space-y-6">
+                        {!hasVoted ? (
+                          <VoteButtons questionId={question.id} questionText={question.text} />
+                        ) : (
+                          <div className="rounded-lg bg-indigo-50 p-6 dark:bg-slate-700">
+                            <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-cyan-400">
+                              Your Vote
+                            </p>
+                            <p className="mt-3 text-2xl font-bold text-slate-900 dark:text-slate-50">
+                              {vote?.vote ? "✓ Agree" : "✗ Disagree"}
+                            </p>
+                          </div>
+                        )}
+                        {hasVoted && <ResultsBar questionId={question.id} />}
+                      </div>
                     </div>
-                  )}
-                  {hasVoted && <ResultsBar questionId={activeQuestion.id} />}
-                </div>
-              </div>
-            </Card>
+                  </Card>
+                );
+              })}
+            </div>
           ) : (
             <Card className="p-12 text-center">
-              <p className="text-lg font-semibold">No active question available yet.</p>
+              <p className="text-lg font-semibold">No active questions available yet.</p>
               <p className="mt-2 text-slate-600 dark:text-slate-400">
-                Check back tomorrow for the next pulse question.
+                Check back tomorrow for the next pulse questions.
               </p>
             </Card>
           )}

@@ -4,13 +4,15 @@ import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import type { Database } from "@/types";
 
-const adminSupabase = createClient<Database>(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-  process.env.SUPABASE_SERVICE_ROLE_KEY || "",
-  {
-    auth: { persistSession: false },
-  }
-);
+function getAdminSupabase() {
+  return createClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+    process.env.SUPABASE_SERVICE_ROLE_KEY || "",
+    {
+      auth: { persistSession: false },
+    }
+  );
+}
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -33,12 +35,16 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 
-  const { data, error } = await adminSupabase.from("votes").select("question_id, vote");
+  const { data, error } = await getAdminSupabase().from("votes").select("question_id, vote");
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  const votes = data.filter((item) => item.question_id === questionId);
+  if (!data) {
+    return NextResponse.json({ agree: 0, disagree: 0, total: 0 });
+  }
+
+  const votes = (data as { question_id: string; vote: boolean }[]).filter((item) => item.question_id === questionId);
   const agree = votes.filter((item) => item.vote).length;
   const disagree = votes.length - agree;
 

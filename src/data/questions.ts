@@ -13,11 +13,21 @@ export const questions: Question[] = [
   {
     id: "2",
     text: "Is artificial intelligence more beneficial than harmful to society?",
-    isActive: false,
+    isActive: true,
   },
   {
     id: "3",
     text: "Should social media platforms be regulated more strictly?",
-    isActive: false,
+    isActive: true,
+  },
+  {
+    id: "4",
+    text: "Do you support universal basic income?",
+    isActive: true,
+  },
+  {
+    id: "5",
+    text: "Should college education be free for all citizens?",
+    isActive: true,
   },
 ];
