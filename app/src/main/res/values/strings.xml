@@ -1,5 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">HelloApp</string>
-    <string name="hello_button">Tap Me</string>
+
+    <string name="hello_button">Hello</string>
+    <string name="hello_toast">Hello!</string>
+    <string name="refresh_button">Refresh</string>
+
+    <string name="header_title">USB TV Detector</string>
+    <string name="header_subtitle">Stage 2 — USB connection detection</string>
+    <string name="section_technical">Technical details</string>
+
+    <!-- Safe default / fallback state (nothing connected) -->
+    <string name="status_title_default">NO USB DEVICE CONNECTED</string>
+    <string name="tv_name_default">Waiting for a connection…</string>
+    <string name="tv_description_default">Plug your phone into your TV with a USB-C cable and tap Refresh.</string>
+
+    <!-- TV identified (phone is USB host) -->
+    <string name="status_tv_detected">TV DETECTED</string>
+    <string name="tv_detected_description" formatted="false">Connected in USB host mode. VID 0x%1$s, PID 0x%2$s — this is likely your TV.</string>
+
+    <!-- Unidentified device in host mode -->
+    <string name="status_usb_host">USB DEVICE CONNECTED (HOST MODE)</string>
+    <string name="usb_host_description">A USB device is connected, but it could not be clearly identified as a TV. See the technical details below.</string>
+
+    <!-- Android Open Accessory (AOA) -->
+    <string name="status_accessory">USB ACCESSORY CONNECTED</string>
+    <string name="accessory_description">Connected via the Android Open Accessory (AOA) protocol.</string>
+
+    <!-- Phone is the USB peripheral (e.g. plugged into a TV's USB port) -->
+    <string name="status_usb_connected">USB CONNECTED</string>
+    <string name="peripheral_name">Connected to a USB host (phone is the USB device)</string>
+    <string name="peripheral_description">Your phone is in device/peripheral mode, so it cannot read the host\'s (TV\'s) name. See the setup notes for the configuration that lets the phone identify the TV.</string>
 </resources>

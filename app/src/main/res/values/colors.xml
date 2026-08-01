@@ -7,4 +7,14 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Stage 2 UI colors -->
+    <color name="background">#F4F6FA</color>
+    <color name="text_primary">#202124</color>
+    <color name="text_secondary">#5F6368</color>
+    <color name="card_white">#FFFFFF</color>
+    <color name="card_border">#E1E3E6</color>
+    <color name="status_success">#1E8E3E</color>
+    <color name="status_connected">#F9AB00</color>
+    <color name="status_default">#9AA0A6</color>
 </resources>
