@@ -62,6 +62,22 @@ public class MainActivity extends AppCompatActivity {
     private static final int DEFAULT_TAP_Y = 540;
     private static final int HTTP_TIMEOUT_MS = 5000;
 
+    // ------------------------------------------------------------------
+    // USB state broadcast strings.
+    //
+    // The system sends a sticky USB_STATE broadcast
+    // ("android.hardware.usb.action.USB_STATE") with boolean extras
+    // "connected" and "configured" whenever the USB connection state changes.
+    // UsbManager exposes ACTION_USB_STATE / USB_CONNECTED / USB_CONFIGURED
+    // only as @SystemApi (@hide) constants, so they are NOT part of the public
+    // SDK and cannot be referenced from an app. These string literals are
+    // byte-for-byte identical to the hidden constants' values, so runtime
+    // behavior is unchanged.
+    // ------------------------------------------------------------------
+    private static final String ACTION_USB_STATE = "android.hardware.usb.action.USB_STATE";
+    private static final String EXTRA_USB_CONNECTED = "connected";
+    private static final String EXTRA_USB_CONFIGURED = "configured";
+
     private UsbManager usbManager;
 
     private View statusDot;
@@ -139,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         IntentFilter filter = new IntentFilter();
-        filter.addAction(UsbManager.ACTION_USB_STATE);
+        filter.addAction(ACTION_USB_STATE);
         filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
         filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
         filter.addAction(UsbManager.ACTION_USB_ACCESSORY_ATTACHED);
@@ -277,10 +293,10 @@ public class MainActivity extends AppCompatActivity {
         try {
             // registerReceiver with a null receiver synchronously returns the last
             // sticky ACTION_USB_STATE broadcast without registering a listener.
-            Intent state = registerReceiver(null, new IntentFilter(UsbManager.ACTION_USB_STATE));
+            Intent state = registerReceiver(null, new IntentFilter(ACTION_USB_STATE));
             if (state != null) {
-                usbConnected = state.getBooleanExtra(UsbManager.EXTRA_USB_CONNECTED, false);
-                usbConfigured = state.getBooleanExtra(UsbManager.EXTRA_USB_CONFIGURED, false);
+                usbConnected = state.getBooleanExtra(EXTRA_USB_CONNECTED, false);
+                usbConfigured = state.getBooleanExtra(EXTRA_USB_CONFIGURED, false);
                 stateExtras = dumpUsbStateExtras(state);
             }
         } catch (Exception e) {
@@ -468,18 +484,16 @@ public class MainActivity extends AppCompatActivity {
             case UsbConstants.USB_CLASS_AUDIO: return "audio";
             case UsbConstants.USB_CLASS_COMM: return "communications";
             case UsbConstants.USB_CLASS_HID: return "hid";
-            case UsbConstants.USB_CLASS_PHYSICAL: return "physical";
-            case UsbConstants.USB_CLASS_IMAGE: return "image";
+            case UsbConstants.USB_CLASS_PHYSICA: return "physical";
+            case UsbConstants.USB_CLASS_STILL_IMAGE: return "image";
             case UsbConstants.USB_CLASS_PRINTER: return "printer";
             case UsbConstants.USB_CLASS_MASS_STORAGE: return "mass storage";
             case UsbConstants.USB_CLASS_HUB: return "hub";
             case UsbConstants.USB_CLASS_CDC_DATA: return "cdc data";
-            case UsbConstants.USB_CLASS_SMART_CARD: return "smart card";
+            case UsbConstants.USB_CLASS_CSCID: return "smart card";
             case UsbConstants.USB_CLASS_CONTENT_SEC: return "content security";
             case UsbConstants.USB_CLASS_VIDEO: return "video";
-            case UsbConstants.USB_CLASS_PERSONAL_HEALTHCARE: return "health";
-            case UsbConstants.USB_CLASS_AUDIO_VIDEO: return "audio/video";
-            case UsbConstants.USB_CLASS_VENDOR_SPECIFIC: return "vendor-specific";
+            case UsbConstants.USB_CLASS_VENDOR_SPEC: return "vendor-specific";
             default: return "0x" + hex2(cls);
         }
     }
