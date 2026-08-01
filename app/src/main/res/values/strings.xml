@@ -7,7 +7,7 @@
     <string name="refresh_button">Refresh</string>
 
     <string name="header_title">USB TV Detector</string>
-    <string name="header_subtitle">Stage 2 — USB connection detection</string>
+    <string name="header_subtitle">USB detection + ADB test tap</string>
     <string name="section_technical">Technical details</string>
 
     <!-- Safe default / fallback state (nothing connected) -->
@@ -31,4 +31,17 @@
     <string name="status_usb_connected">USB CONNECTED</string>
     <string name="peripheral_name">Connected to a USB host (phone is the USB device)</string>
     <string name="peripheral_description">Your phone is in device/peripheral mode, so it cannot read the host\'s (TV\'s) name. See the setup notes for the configuration that lets the phone identify the TV.</string>
+
+    <!-- Stage 3: ADB test tap through the laptop relay -->
+    <string name="stage3_title">Stage 3 - ADB Test Tap</string>
+    <string name="stage3_subtitle">Sends one tap to the TV through the relay on your laptop (tools/relay.py). USB detection above is unaffected.</string>
+    <string name="relay_url_label">Relay URL (laptop running relay.py)</string>
+    <string name="relay_url_default">http://127.0.0.1:8080</string>
+    <string name="tap_x_hint">X (default 960)</string>
+    <string name="tap_y_hint">Y (default 540)</string>
+    <string name="tap_x_default">960</string>
+    <string name="tap_y_default">540</string>
+    <string name="send_tap_button">Send Test Tap</string>
+    <string name="tap_result_default">Not sent yet. Start tools/relay.py on your laptop, then tap Send Test Tap.</string>
+    <string name="tap_sending" formatted="false">Sending tap to %1$s …</string>
 </resources>

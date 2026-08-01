@@ -12,28 +12,38 @@ import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 
 /**
- * Stage 2 — USB connection detection.
+ * Stage 2 + Stage 3.
  *
- * Detects when the phone is connected to another device (e.g. an Android Smart TV)
- * over a USB-C cable:
- *  - If the phone is the USB HOST it can enumerate the connected device and read
- *    its manufacturer / product name (this is how the TV's name is displayed).
- *  - If the phone is the USB PERIPHERAL (the common case when plugged into a TV's
- *    USB port), Android only reports that a connection exists — the app shows a
- *    "USB connected" state but cannot read the host's identity.
- *  - If nothing is connected, a safe default state is shown so the app never crashes.
+ * Stage 2 - USB connection detection:
+ *   Detects when the phone is connected to another device (e.g. an Android Smart TV)
+ *   over a USB-C cable. If the phone is the USB HOST it can read the connected
+ *   device's manufacturer/product name; in peripheral mode it can only report that
+ *   a connection exists; with nothing connected it shows a safe default state.
+ *
+ * Stage 3 - ADB test tap:
+ *   The phone app sends one HTTP POST to a small relay that runs on your laptop
+ *   (tools/relay.py). The relay executes `adb shell input tap x y` against the TV
+ *   over Wi-Fi. The phone itself never talks adb to the TV - a TV's USB port is a
+ *   host port, so adb cannot travel over the phone<->TV USB cable.
  */
 public class MainActivity extends AppCompatActivity {
 
@@ -46,6 +56,12 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int MAX_EVENT_LOG_LINES = 30;
 
+    // Stage 3 defaults (matches the relay defaults).
+    private static final String DEFAULT_RELAY_URL = "http://127.0.0.1:8080";
+    private static final int DEFAULT_TAP_X = 960;
+    private static final int DEFAULT_TAP_Y = 540;
+    private static final int HTTP_TIMEOUT_MS = 5000;
+
     private UsbManager usbManager;
 
     private View statusDot;
@@ -53,6 +69,11 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvName;
     private TextView tvDescription;
     private TextView detailsText;
+
+    private EditText relayUrlInput;
+    private EditText tapXInput;
+    private EditText tapYInput;
+    private TextView tapResultText;
 
     private final StringBuilder eventLog = new StringBuilder();
 
@@ -80,6 +101,11 @@ public class MainActivity extends AppCompatActivity {
         tvDescription = findViewById(R.id.tvDescription);
         detailsText = findViewById(R.id.detailsText);
 
+        relayUrlInput = findViewById(R.id.relayUrlInput);
+        tapXInput = findViewById(R.id.tapXInput);
+        tapYInput = findViewById(R.id.tapYInput);
+        tapResultText = findViewById(R.id.tapResultText);
+
         Button refreshButton = findViewById(R.id.refreshButton);
         refreshButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -94,6 +120,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Toast.makeText(MainActivity.this, R.string.hello_toast, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        Button sendTapButton = findViewById(R.id.sendTapButton);
+        sendTapButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendTestTap();
             }
         });
 
@@ -125,7 +159,92 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // ------------------------------------------------------------------ state
+    // ------------------------------------------------------------------
+    // Stage 3: send one test tap through the laptop relay (tools/relay.py)
+    // ------------------------------------------------------------------
+
+    private void sendTestTap() {
+        String baseUrl = relayUrlInput.getText().toString().trim();
+        if (baseUrl.isEmpty()) {
+            baseUrl = DEFAULT_RELAY_URL;
+            relayUrlInput.setText(baseUrl);
+        }
+
+        final int x = parseCoord(tapXInput, DEFAULT_TAP_X);
+        final int y = parseCoord(tapYInput, DEFAULT_TAP_Y);
+        tapXInput.setText(String.valueOf(x));
+        tapYInput.setText(String.valueOf(y));
+
+        final String url = baseUrl.endsWith("/") ? baseUrl + "tap" : baseUrl + "/tap";
+        final String body = "{\"x\":" + x + ",\"y\":" + y + "}";
+
+        tapResultText.setText(getString(R.string.tap_sending, url));
+
+        // HTTP must never run on the UI thread.
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final String result = httpPost(url, body);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        tapResultText.setText(result);
+                    }
+                });
+            }
+        }).start();
+    }
+
+    private static int parseCoord(EditText input, int fallback) {
+        try {
+            return Integer.parseInt(input.getText().toString().trim());
+        } catch (NumberFormatException e) {
+            return fallback;
+        }
+    }
+
+    private static String httpPost(String urlString, String body) {
+        HttpURLConnection conn = null;
+        try {
+            URL url = new URL(urlString);
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setConnectTimeout(HTTP_TIMEOUT_MS);
+            conn.setReadTimeout(HTTP_TIMEOUT_MS);
+            conn.setDoOutput(true);
+            conn.setRequestProperty("Content-Type", "application/json");
+
+            OutputStream out = conn.getOutputStream();
+            out.write(body.getBytes(StandardCharsets.UTF_8));
+            out.flush();
+            out.close();
+
+            int code = conn.getResponseCode();
+            InputStream in = code >= 400 ? conn.getErrorStream() : conn.getInputStream();
+            String response = in == null ? "" : readStream(in);
+            return "HTTP " + code + " - " + response.trim();
+        } catch (Exception e) {
+            return "Could not reach relay: " + e.getMessage();
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+    }
+
+    private static String readStream(InputStream in) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        byte[] buffer = new byte[1024];
+        int read;
+        while ((read = in.read(buffer)) != -1) {
+            sb.append(new String(buffer, 0, read, StandardCharsets.UTF_8));
+        }
+        return sb.toString();
+    }
+
+    // ------------------------------------------------------------------
+    // Stage 2: USB connection state
+    // ------------------------------------------------------------------
 
     private void refreshUsbState() {
         if (usbManager == null) {
@@ -175,7 +294,7 @@ public class MainActivity extends AppCompatActivity {
         if (!hostDevices.isEmpty()) {
             detail.append("HOST (phone is driving the connection)\n");
         } else if (usbConnected) {
-            detail.append("PERIPHERAL (phone is the USB device — e.g. plugged into a TV)\n");
+            detail.append("PERIPHERAL (phone is the USB device - e.g. plugged into a TV)\n");
         } else {
             detail.append("no active USB connection\n");
         }
@@ -185,7 +304,7 @@ public class MainActivity extends AppCompatActivity {
 
         detail.append("=== HOST-MODE DEVICES (").append(hostDevices.size()).append(") ===\n");
         if (hostDevices.isEmpty()) {
-            detail.append("(none — the phone is not the USB host right now)\n");
+            detail.append("(none - the phone is not the USB host right now)\n");
         }
         UsbDevice tvCandidate = null;
         for (UsbDevice device : hostDevices.values()) {

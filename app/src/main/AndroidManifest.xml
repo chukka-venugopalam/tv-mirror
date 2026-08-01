@@ -12,11 +12,18 @@
         android:name="android.hardware.usb.accessory"
         android:required="false" />
 
+    <!--
+        Stage 3: the app sends one HTTP POST (tap command) to the relay running
+        on your laptop (tools/relay.py). No other permissions are needed.
+    -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.HelloApp">
+        android:theme="@style/Theme.HelloApp"
+        android:usesCleartextTraffic="true">
 
         <activity
             android:name=".MainActivity"
