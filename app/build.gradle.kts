@@ -29,5 +29,5 @@ dependencies {
 
     // Room database (Alarms, Todos, Notes)
     implementation("androidx.room:room-runtime:2.6.1")
-    annotationProcessor("androidx.room:room-compiler:2.6.1")
+    add("annotationProcessor", "androidx.room:room-compiler:2.6.1")
 }
