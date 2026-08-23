@@ -26,8 +26,4 @@ dependencies {
 
     // Stage 4: embedded adb client (kept for TV remote)
     implementation("com.tananaev:adblib:1.3")
-
-    // Room database (Alarms, Todos, Notes)
-    implementation("androidx.room:room-runtime:2.5.2")
-    annotationProcessor("androidx.room:room-compiler:2.5.2")
 }

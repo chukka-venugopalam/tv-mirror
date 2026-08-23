@@ -1,13 +1,12 @@
 package com.helloapp;
 
-import androidx.room.Entity;
-import androidx.room.PrimaryKey;
-
-@Entity(tableName = "notes")
+/**
+ * Plain POJO for the notes table. No Room annotations.
+ */
 public class NoteEntity {
 
-    @PrimaryKey(autoGenerate = true)
-    public long id;
+    /** Auto-generated primary key. -1 if not yet persisted. */
+    public long id = -1;
 
     /** Note title. */
     public String title;

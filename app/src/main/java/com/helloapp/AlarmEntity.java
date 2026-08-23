@@ -1,13 +1,12 @@
 package com.helloapp;
 
-import androidx.room.Entity;
-import androidx.room.PrimaryKey;
-
-@Entity(tableName = "alarms")
+/**
+ * Plain POJO for the alarms table. No Room annotations.
+ */
 public class AlarmEntity {
 
-    @PrimaryKey(autoGenerate = true)
-    public long id;
+    /** Auto-generated primary key. -1 if not yet persisted. */
+    public long id = -1;
 
     /** Hour of day (0-23). */
     public int hour;

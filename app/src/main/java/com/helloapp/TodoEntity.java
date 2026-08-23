@@ -1,13 +1,12 @@
 package com.helloapp;
 
-import androidx.room.Entity;
-import androidx.room.PrimaryKey;
-
-@Entity(tableName = "todos")
+/**
+ * Plain POJO for the todos table. No Room annotations.
+ */
 public class TodoEntity {
 
-    @PrimaryKey(autoGenerate = true)
-    public long id;
+    /** Auto-generated primary key. -1 if not yet persisted. */
+    public long id = -1;
 
     /** Task text. */
     public String text;
