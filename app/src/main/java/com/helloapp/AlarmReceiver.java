@@ -59,17 +59,21 @@ public class AlarmReceiver extends BroadcastReceiver {
                     .setContentText("Alarm at " + timeText)
                     .setPriority(NotificationCompat.PRIORITY_HIGH)
                     .setAutoCancel(true)
-                    .setContentIntent(pending);
+                    .setContentIntent(pending)
+                    .setDefaults(android.app.Notification.DEFAULT_ALL);
 
-            // Play the default alarm ringtone with the notification.
+            NotificationManager mgr = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            mgr.notify((int) alarmId, builder.build());
+
+            // Play the default alarm ringtone.
             Uri ringtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
             if (ringtoneUri == null) {
                 ringtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             }
-            builder.setSound(ringtoneUri);
-
-            NotificationManager mgr = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            mgr.notify((int) alarmId, builder.build());
+            android.media.Ringtone ringtone = RingtoneManager.getRingtone(context, ringtoneUri);
+            if (ringtone != null) {
+                ringtone.play();
+            }
         });
     }
 
