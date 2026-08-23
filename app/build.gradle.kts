@@ -28,6 +28,6 @@ dependencies {
     implementation("com.tananaev:adblib:1.3")
 
     // Room database (Alarms, Todos, Notes)
-    implementation("androidx.room:room-runtime:2.6.1")
-    annotationProcessor("androidx.room:room-compiler:2.6.1")
+    implementation("androidx.room:room-runtime:2.5.2")
+    annotationProcessor("androidx.room:room-compiler:2.5.2")
 }
