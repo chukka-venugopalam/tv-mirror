@@ -10,8 +10,8 @@ android {
         applicationId = "com.helloapp"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "2.0"
     }
 
     compileOptions {
@@ -24,10 +24,10 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 
-    // Stage 4: embedded adb client - the phone speaks the ADB protocol directly
-    // to the TV's adbd over TCP (no laptop/relay). Pure-Java implementation of the
-    // ADB wire protocol (CNXN/AUTH/OPEN/WRTE/CLSE) including the RSA key
-    // handshake. Runs on a normal Android app, no root needed.
-    // https://github.com/tananaev/adblib (maintained fork of CrowdStrike adblib)
+    // Stage 4: embedded adb client (kept for TV remote)
     implementation("com.tananaev:adblib:1.3")
+
+    // Room database (Alarms, Todos, Notes)
+    implementation("androidx.room:room-runtime:2.6.1")
+    annotationProcessor("androidx.room:room-compiler:2.6.1")
 }

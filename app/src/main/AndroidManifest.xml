@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!--
-        USB features are OPTIONAL (required="false") so the app still installs and
-        runs on any phone, even ones without USB host/accessory support.
-    -->
     <uses-feature
         android:name="android.hardware.usb.host"
         android:required="false" />
@@ -12,11 +8,9 @@
         android:name="android.hardware.usb.accessory"
         android:required="false" />
 
-    <!--
-        Stage 3: the app sends one HTTP POST (tap command) to the relay running
-        on your laptop (tools/relay.py). No other permissions are needed.
-    -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <application
         android:allowBackup="true"
@@ -25,22 +19,30 @@
         android:theme="@style/Theme.HelloApp"
         android:usesCleartextTraffic="true">
 
+        <!-- New launcher: assistant home screen -->
         <activity
-            android:name=".MainActivity"
+            android:name=".HomeActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
-            <!--
-                Auto-open the app when a USB device is attached while the phone is
-                the USB host (fires only in host mode, e.g. an OTG connection).
-            -->
-            <intent-filter>
-                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
-            </intent-filter>
         </activity>
+
+        <!-- Original TV remote (no longer the launcher) -->
+        <activity android:name=".MainActivity" />
+
+        <!-- Assistant features -->
+        <activity android:name=".AlarmsActivity" />
+        <activity android:name=".AddAlarmActivity" />
+        <activity android:name=".TodosActivity" />
+        <activity android:name=".NotesActivity" />
+        <activity android:name=".AddEditNoteActivity" />
+
+        <!-- Alarm receiver -->
+        <receiver
+            android:name=".AlarmReceiver"
+            android:exported="false" />
 
     </application>
 

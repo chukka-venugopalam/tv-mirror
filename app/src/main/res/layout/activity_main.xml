@@ -11,6 +11,14 @@
         android:orientation="vertical"
         android:padding="20dp">
 
+        <Button
+            android:id="@+id/btnBackHome"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/back_to_home"
+            android:layout_marginBottom="8dp"
+            style="?android:attr/borderlessButtonStyle" />
+
         <TextView
             android:id="@+id/headerTitle"
             android:layout_width="wrap_content"
