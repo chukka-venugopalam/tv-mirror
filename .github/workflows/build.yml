@@ -26,7 +26,14 @@ jobs:
         run: gradle wrapper --gradle-version 8.5
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace 2>&1
+        run: ./gradlew assembleDebug 2>&1 | tee /tmp/build-output.txt; exit ${PIPESTATUS[0]}
+
+      - name: Upload Build Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs
+          path: /tmp/build-output.txt
 
       - name: Upload Debug APK
         if: success()
