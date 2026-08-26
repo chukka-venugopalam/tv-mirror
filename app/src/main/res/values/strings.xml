@@ -31,7 +31,7 @@
     <!-- Phone is the USB peripheral (e.g. plugged into a TV's USB port) -->
     <string name="status_usb_connected">USB CONNECTED</string>
     <string name="peripheral_name">Connected to a USB host (phone is the USB device)</string>
-    <string name="peripheral_description">Your phone is in device/peripheral mode, so it cannot read the host\\'s (TV\\'s) name. See the setup notes for the configuration that lets the phone identify the TV.</string>
+    <string name="peripheral_description">Your phone is in device/peripheral mode, so it cannot read the host\'s (TV\'s) name. See the setup notes for the configuration that lets the phone identify the TV.</string>
 
     <!-- Stage 3: ADB test tap through the laptop relay -->
     <string name="stage3_title">Stage 3 - ADB Test Tap</string>
@@ -48,13 +48,13 @@
 
     <!-- Stage 4: embedded adb client (phone talks directly to the TV) -->
     <string name="stage4_title">Stage 4 - Direct ADB (Phone → TV)</string>
-    <string name="stage4_subtitle">The phone itself is the adb client. No laptop, no relay - the phone and TV only need to be on the same Wi-Fi (e.g. the phone\\'s own hotspot).</string>
+    <string name="stage4_subtitle">The phone itself is the adb client. No laptop, no relay - the phone and TV only need to be on the same Wi-Fi (e.g. the phone\'s own hotspot).</string>
     <string name="tv_ip_hint">TV IP (TV Settings → Network → status)</string>
     <string name="adb_port_label">Port</string>
     <string name="adb_port_default">5555</string>
     <string name="connect_button">Connect</string>
     <string name="send_direct_tap_button">Send Test Tap (960, 540)</string>
-    <string name="stage4_status_default">Not connected. Enable USB debugging (+ network debugging) on the TV, enter the TV\\'s IP, then tap Connect.</string>
+    <string name="stage4_status_default">Not connected. Enable USB debugging (+ network debugging) on the TV, enter the TV\'s IP, then tap Connect.</string>
     <string name="stage4_status_connecting" formatted="false">Connecting to %1$s:%2$d …</string>
     <string name="stage4_status_connected" formatted="false">Connected to %1$s:%2$d - authorized. Tap Send Test Tap.</string>
     <string name="stage4_status_tapping" formatted="false">Sending tap at %1$d,%2$d …</string>
@@ -63,7 +63,7 @@
     <string name="stage4_status_tap_failed" formatted="false">Tap failed - connection lost (%1$s). Tap Connect again.</string>
     <string name="stage4_status_tap_timeout">Tap command timed out - the TV may have disconnected. Tap Connect again.</string>
     <string name="stage4_error_not_connected">Not connected to the TV. Tap Connect first.</string>
-    <string name="stage4_error_no_ip">Enter the TV\\'s IP address first.</string>
+    <string name="stage4_error_no_ip">Enter the TV\'s IP address first.</string>
     <string name="stage4_error_bad_ip" formatted="false">Not a valid IP address: %1$s</string>
     <string name="stage4_error_unreachable" formatted="false">TV not reachable at %1$s:%2$d. Check: same Wi-Fi/hotspot, correct IP, and USB debugging + network debugging enabled on the TV.</string>
     <string name="stage4_error_not_authorized_timeout">Reached the TV, but it did not authorize this phone in time. Check the TV screen for the \"Allow USB debugging?\" prompt, accept it, then tap Connect again.</string>
